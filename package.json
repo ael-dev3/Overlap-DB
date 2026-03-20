@@ -1,0 +1,15 @@
+{
+  "name": "overlap-db",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Backfill and snapshot utilities for Overlap user datasets.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.11.0"
+  },
+  "scripts": {
+    "backfill:0.99": "node scripts/backfill-neynar-users.mjs --threshold 0.99",
+    "export:cache": "node scripts/export-cache-snapshot.mjs --threshold 0.99",
+    "validate": "node scripts/validate-dataset.mjs"
+  }
+}

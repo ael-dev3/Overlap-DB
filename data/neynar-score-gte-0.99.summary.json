@@ -1,0 +1,33 @@
+{
+  "generatedAt": "2026-03-20T11:33:23.290Z",
+  "minScore": 0.99,
+  "numUsers": 2509,
+  "status": "partial",
+  "statusReason": "Operator requested export from local cache before scan completion.",
+  "scoreFieldPriority": [
+    "experimental.neynar_user_score",
+    "score"
+  ],
+  "source": {
+    "fidsApi": "https://snapchain-api.neynar.com/v1/fids",
+    "bulkUsersApi": "https://api.neynar.com/v2/farcaster/user/bulk/"
+  },
+  "stats": {
+    "fidsScanned": 2748290,
+    "matches": 2509,
+    "rateLimitRetries": 0,
+    "retries": 0,
+    "userBatches": 28303,
+    "usersHydrated": 2748290
+  },
+  "shards": {
+    "1": {
+      "done": true,
+      "nextPageToken": ""
+    },
+    "2": {
+      "done": false,
+      "nextPageToken": "DAEDACUGfgi/sIsAAAD5"
+    }
+  }
+}

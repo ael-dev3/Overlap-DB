@@ -1,0 +1,24 @@
+{
+  "exportedAt": "2026-03-20T11:33:23.290Z",
+  "minScore": 0.99,
+  "cacheFile": ".cache/backfill-gte-0.99.json",
+  "resumeAvailable": true,
+  "shards": {
+    "1": {
+      "done": true,
+      "nextPageToken": ""
+    },
+    "2": {
+      "done": false,
+      "nextPageToken": "DAEDACUGfgi/sIsAAAD5"
+    }
+  },
+  "stats": {
+    "fidsScanned": 2748290,
+    "matches": 2509,
+    "rateLimitRetries": 0,
+    "retries": 0,
+    "userBatches": 28303,
+    "usersHydrated": 2748290
+  }
+}
