@@ -1,0 +1,28 @@
+{
+  "generatedAt": "2026-03-20T11:32:45.164Z",
+  "status": "partial",
+  "statusReason": "Operator requested export from local cache before scan completion.",
+  "apiCallsAfterStop": false,
+  "fidsScanned": 2748290,
+  "rankedUsersAtThreshold_0_99": 2509,
+  "nonRankedUsersSeen": 2745781,
+  "individualUnrankedFidsPersisted": false,
+  "individualUnrankedFidsReason": "The crawler only retained >= 0.99 matches and aggregate scan stats.",
+  "resumeAvailable": true,
+  "resumeSource": ".cache/backfill-gte-0.99.json",
+  "shards": {
+    "1": {
+      "done": true,
+      "nextPageToken": ""
+    },
+    "2": {
+      "done": false,
+      "nextPageToken": "DAEDACUGfgi/sIsAAAD5"
+    }
+  },
+  "relatedFiles": {
+    "rankedUsers": "data/neynar-score-gte-0.99.users.json",
+    "summary": "data/neynar-score-gte-0.99.summary.json",
+    "progress": "data/neynar-score-gte-0.99.progress.json"
+  }
+}

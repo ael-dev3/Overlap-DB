@@ -7,6 +7,7 @@ Reusable data snapshots for Overlap.
 - `data/neynar-score-gte-0.99.users.json`
 - `data/neynar-score-gte-0.99.summary.json`
 - `data/neynar-score-gte-0.99.progress.json`
+- `unranked/fids-scanned.partial.json`
 
 Current committed snapshot:
 
@@ -16,6 +17,7 @@ Current committed snapshot:
 - `userBatches: 28303`
 - `shard 1: complete`
 - `shard 2: paused with resume token recorded in progress.json`
+- `unranked folder: offline scan-state metadata only; individual non-ranked FIDs were not persisted`
 
 These files are generated from:
 
