@@ -1,0 +1,46 @@
+{
+  "generatedAt": "2026-03-20T12:37:41+00:00",
+  "hubUrl": "http://54.157.62.17:3381",
+  "inputUsers": "data/neynar-score-gte-0.99.users.json",
+  "outputUsers": "data/neynar-score-gte-0.99.users.with-context-tags.last-24h.json",
+  "outputSummary": "data/neynar-score-gte-0.99.context-tags.last-24h.summary.json",
+  "scanWindowHours": 24.0,
+  "shards": [
+    1,
+    2
+  ],
+  "source": "snapchain_direct_via_farcaster_context_skill",
+  "fetch": {
+    "hours": 24.0,
+    "mergeEventsProcessed": 259734,
+    "rawEventsProcessed": 506391,
+    "reactionMessagesProcessed": 78227,
+    "targetCastMessages": 58605,
+    "targetFids": null,
+    "trackedAuthors": 14460,
+    "targetCastsKept": 58605
+  },
+  "enrichment": {
+    "activeUsers": 378,
+    "profilesResolved": 50,
+    "roleCounts": {
+      "artist": 8,
+      "builder": 18,
+      "creator": 4,
+      "trader": 3
+    },
+    "taggedUsers": 50,
+    "topicCounts": {
+      "agents": 4,
+      "ai": 20,
+      "content": 2,
+      "ethereum": 2,
+      "gaming": 2,
+      "mini_apps": 3,
+      "nfts": 1,
+      "social": 7,
+      "trading": 2
+    },
+    "totalUsers": 2509
+  }
+}

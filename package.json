@@ -10,6 +10,8 @@
   "scripts": {
     "backfill:0.99": "node scripts/backfill-neynar-users.mjs --threshold 0.99",
     "export:cache": "node scripts/export-cache-snapshot.mjs --threshold 0.99",
+    "tag:context:24h": "python3 scripts/enrich_fids_with_snapchain_context.py --hours 24",
+    "tag:cohort:7d": "python3 scripts/enrich_fids_with_snapchain_context.py --hours 168 --skip-active-export",
     "validate": "node scripts/validate-dataset.mjs"
   }
 }
