@@ -5,6 +5,7 @@ const cwd = process.cwd();
 const dataDir = resolve(cwd, "data");
 const usersPath = resolve(dataDir, "neynar-score-gte-0.99.users.json");
 const summaryPath = resolve(dataDir, "neynar-score-gte-0.99.summary.json");
+const allowedRoleTags = new Set(["artist", "builder", "creator", "trader"]);
 
 function isObject(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -84,7 +85,6 @@ function validateContextDataset(rows, summary, { expectedLength = null, label })
   let taggedUsers = 0;
   let profilesResolved = 0;
   const assignedRoles = [];
-  const assignedTopics = [];
 
   for (const [index, row] of rows.entries()) {
     if (!Number.isInteger(row?.fid) || row.fid <= 0) {
@@ -95,19 +95,25 @@ function validateContextDataset(rows, summary, { expectedLength = null, label })
     }
     seenFids.add(row.fid);
 
-    if (!isObject(row.contextTags)) {
-      throw new Error(`${label}: missing contextTags for fid ${row.fid}`);
+    if (!Array.isArray(row.roleTags)) {
+      throw new Error(`${label}: missing roleTags for fid ${row.fid}`);
     }
-    if (row.contextTags.windowHours !== summary.scanWindowHours) {
+    if (!isObject(row.roleTagMeta)) {
+      throw new Error(`${label}: missing roleTagMeta for fid ${row.fid}`);
+    }
+    if (row.roleTagMeta.windowHours !== summary.scanWindowHours) {
       throw new Error(`${label}: windowHours mismatch for fid ${row.fid}`);
     }
 
-    const assignedRowRoles = Array.isArray(row.contextTags.assignedRoles) ? row.contextTags.assignedRoles : [];
-    const assignedRowTopics = Array.isArray(row.contextTags.assignedTopics) ? row.contextTags.assignedTopics : [];
+    const assignedRowRoles = row.roleTags;
+    for (const roleTag of assignedRowRoles) {
+      if (!allowedRoleTags.has(roleTag)) {
+        throw new Error(`${label}: unsupported role tag ${roleTag} for fid ${row.fid}`);
+      }
+    }
     assignedRoles.push(...assignedRowRoles);
-    assignedTopics.push(...assignedRowTopics);
 
-    const activity = isObject(row.contextTags.activity) ? row.contextTags.activity : null;
+    const activity = isObject(row.roleTagMeta.activity) ? row.roleTagMeta.activity : null;
     if (!activity) {
       throw new Error(`${label}: missing activity block for fid ${row.fid}`);
     }
@@ -115,7 +121,7 @@ function validateContextDataset(rows, summary, { expectedLength = null, label })
     if (casts > 0) {
       activeUsers += 1;
     }
-    if (assignedRowRoles.length > 0 || assignedRowTopics.length > 0) {
+    if (assignedRowRoles.length > 0) {
       taggedUsers += 1;
     }
 
@@ -125,7 +131,6 @@ function validateContextDataset(rows, summary, { expectedLength = null, label })
   }
 
   const roleCounts = countAssigned(assignedRoles);
-  const topicCounts = countAssigned(assignedTopics);
 
   if (activeUsers !== summary.enrichment.activeUsers) {
     throw new Error(`${label}: activeUsers mismatch`);
@@ -138,9 +143,6 @@ function validateContextDataset(rows, summary, { expectedLength = null, label })
   }
   if (JSON.stringify(roleCounts) !== JSON.stringify(summary.enrichment.roleCounts ?? {})) {
     throw new Error(`${label}: roleCounts mismatch`);
-  }
-  if (JSON.stringify(topicCounts) !== JSON.stringify(summary.enrichment.topicCounts ?? {})) {
-    throw new Error(`${label}: topicCounts mismatch`);
   }
 }
 

@@ -12,6 +12,7 @@
     "export:cache": "node scripts/export-cache-snapshot.mjs --threshold 0.99",
     "tag:context:24h": "python3 scripts/enrich_fids_with_snapchain_context.py --hours 24",
     "tag:cohort:7d": "python3 scripts/enrich_fids_with_snapchain_context.py --hours 168 --skip-active-export",
+    "rewrite:role-tags": "node scripts/rewrite-role-tag-datasets.mjs",
     "validate": "node scripts/validate-dataset.mjs"
   }
 }

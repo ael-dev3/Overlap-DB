@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build deterministic per-FID Snapchain context tags for Overlap-DB.
+"""Build deterministic per-FID Snapchain role tags for Overlap-DB.
 
 This script uses the local Clawberto-Farcaster-Context skill repo to talk
 directly to the Snapchain hub and emits two repo-friendly artifacts:
@@ -8,7 +8,7 @@ directly to the Snapchain hub and emits two repo-friendly artifacts:
    Active authors seen in the rolling window, tagged from their recent casts
    and enriched with hub profile metadata.
 2. `neynar-score-gte-0.99.users.with-context-tags.*.json`
-   Existing high-score users merged with direct Snapchain context tags from the
+   Existing high-score users merged with direct Snapchain role tags from the
    same rolling window.
 
 No Neynar API calls are used here.
@@ -64,23 +64,6 @@ ROLE_QUALIFIER_PATTERNS = {
     ),
 }
 
-TOPIC_PATTERNS = {
-    "ai": (r"\b(ai|llm|llms|model|models|inference|training|agent|agents)\b",),
-    "agents": (r"\b(agent|agents|autonomous|automation)\b",),
-    "defi": (r"\b(defi|dex|amm|swap|yield|liquidity|staking|staked|pool|vault)\b",),
-    "trading": (r"\b(trade|trader|trading|pnl|position|positions|chart|charts|perp|perps)\b",),
-    "mini_apps": (r"\b(mini app|miniapp|frame|frames)\b",),
-    "nfts": (r"\b(nft|nfts|collectible|collectibles|mint|minting)\b",),
-    "gaming": (r"\b(game|gaming|games)\b",),
-    "content": (r"\b(content|video|videos|podcast|newsletter|thread|threads|audience)\b",),
-    "social": (r"\b(social|community|communities|network|friends|followers)\b",),
-    "base": (r"\b(base|basechain)\b",),
-    "ethereum": (r"\b(eth|ethereum)\b",),
-    "bitcoin": (r"\b(btc|bitcoin)\b",),
-    "solana": (r"\b(sol|solana)\b",),
-    "hyperliquid": (r"\b(hyperliquid|hype)\b",),
-}
-
 KEYWORD_PATTERN = re.compile(r"[a-z][a-z0-9']{2,}")
 STOPWORDS = {
     "about", "after", "all", "also", "and", "any", "are", "because", "been", "before",
@@ -103,12 +86,12 @@ HUB_PROFILE_FIELD_MAP = {
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Enrich Overlap-DB with deterministic role/topic tags from direct Snapchain context.",
+        description="Enrich Overlap-DB with deterministic role tags from direct Snapchain context.",
     )
     parser.add_argument(
         "--input-users",
         default="data/neynar-score-gte-0.99.users.json",
-        help="Existing users file to merge with Snapchain context tags.",
+        help="Existing users file to merge with Snapchain role tags.",
     )
     parser.add_argument(
         "--output-users",
@@ -162,7 +145,7 @@ def parse_args() -> argparse.Namespace:
         "--sample-snippets",
         type=int,
         default=3,
-        help="Max evidence snippets per assigned role/tag.",
+        help="Max evidence snippets per assigned role.",
     )
     parser.add_argument(
         "--skip-active-export",
@@ -436,7 +419,6 @@ def enrich_rows_with_context(
     merged: bool,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     role_patterns = compile_patterns(ROLE_PATTERNS)
-    topic_patterns = compile_patterns(TOPIC_PATTERNS)
 
     by_fid: dict[int, list[dict[str, Any]]] = defaultdict(list)
     for cast in casts:
@@ -445,7 +427,6 @@ def enrich_rows_with_context(
             by_fid[fid].append(cast)
 
     role_counts: Counter[str] = Counter()
-    topic_counts: Counter[str] = Counter()
     active_users = 0
     tagged_users = 0
     profiles_resolved = 0
@@ -462,9 +443,6 @@ def enrich_rows_with_context(
         role_scores: Counter[str] = Counter()
         role_hits: Counter[str] = Counter()
         role_cast_matches: Counter[str] = Counter()
-        topic_scores: Counter[str] = Counter()
-        topic_hits: Counter[str] = Counter()
-        topic_cast_matches: Counter[str] = Counter()
         role_qualifier_hits: Counter[str] = Counter()
         activity_days: set[str] = set()
 
@@ -486,10 +464,6 @@ def enrich_rows_with_context(
                 qualifier_pattern = ROLE_QUALIFIER_PATTERNS.get(label)
                 if qualifier_pattern and qualifier_pattern.search(text):
                     role_qualifier_hits[label] += 1
-            for label, (score, hits) in match_scores(text, topic_patterns, weight).items():
-                topic_scores[label] += score
-                topic_hits[label] += hits
-                topic_cast_matches[label] += 1
 
         profile = metadata_by_fid.get(fid) or {}
         profile_texts = []
@@ -506,9 +480,6 @@ def enrich_rows_with_context(
                 qualifier_pattern = ROLE_QUALIFIER_PATTERNS.get(label)
                 if qualifier_pattern and qualifier_pattern.search(profile_blob):
                     role_qualifier_hits[label] += 1
-            for label, (score, hits) in match_scores(profile_blob, topic_patterns, 0.9).items():
-                topic_scores[label] += score
-                topic_hits[label] += hits
 
         assigned_roles = assign_labels(
             dict(role_scores),
@@ -522,45 +493,29 @@ def enrich_rows_with_context(
             for role in assigned_roles
             if ROLE_QUALIFIER_PATTERNS.get(role) is None or role_qualifier_hits.get(role, 0) > 0
         ]
-        assigned_topics = assign_labels(
-            dict(topic_scores),
-            dict(topic_hits),
-            dict(topic_cast_matches),
-            min_score=2.0,
-            min_hits=2,
-        )
 
         if user_casts:
             active_users += 1
-        if assigned_roles or assigned_topics:
+        if assigned_roles:
             tagged_users += 1
         if any(profile.values()):
             profiles_resolved += 1
 
         for role in assigned_roles:
             role_counts[role] += 1
-        for topic in assigned_topics:
-            topic_counts[topic] += 1
 
         role_evidence = {
             role: extract_evidence(user_casts, role_patterns[role], sample_snippets)
             for role in assigned_roles
         }
-        topic_evidence = {
-            topic: extract_evidence(user_casts, topic_patterns[topic], sample_snippets)
-            for topic in assigned_topics
-        }
 
         base_record = dict(row) if merged else {"fid": fid}
         base_record["snapchainProfile"] = profile
-        base_record["contextTags"] = {
+        base_record["roleTags"] = assigned_roles
+        base_record["roleTagMeta"] = {
             "windowHours": window_hours,
-            "assignedRoles": assigned_roles,
-            "assignedTopics": assigned_topics,
-            "roleScores": {key: round(value, 4) for key, value in sorted(role_scores.items())},
-            "roleHits": {key: int(value) for key, value in sorted(role_hits.items())},
-            "topicScores": {key: round(value, 4) for key, value in sorted(topic_scores.items())},
-            "topicHits": {key: int(value) for key, value in sorted(topic_hits.items())},
+            "tagScores": {key: round(value, 4) for key, value in sorted(role_scores.items())},
+            "tagHits": {key: int(value) for key, value in sorted(role_hits.items())},
             "activity": {
                 "casts": len(user_casts),
                 "posts": sum(1 for cast in user_casts if cast.get("type") == "post"),
@@ -572,8 +527,7 @@ def enrich_rows_with_context(
                 "lastCastAt": user_casts[0].get("timestamp") if user_casts else None,
             },
             "keywords": top_keywords(texts),
-            "roleEvidence": role_evidence,
-            "topicEvidence": topic_evidence,
+            "tagEvidence": role_evidence,
         }
         enriched_rows.append(base_record)
 
@@ -582,7 +536,6 @@ def enrich_rows_with_context(
         "profilesResolved": profiles_resolved,
         "roleCounts": dict(sorted(role_counts.items())),
         "taggedUsers": tagged_users,
-        "topicCounts": dict(sorted(topic_counts.items())),
         "totalUsers": len(rows),
     }
     return enriched_rows, summary
@@ -795,9 +748,9 @@ def fetch_context_casts(
 
 def sort_active_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     def sort_key(row: dict[str, Any]) -> tuple[Any, ...]:
-        context = row.get("contextTags") or {}
-        activity = context.get("activity") or {}
-        tagged = bool(context.get("assignedRoles") or context.get("assignedTopics"))
+        role_tag_meta = row.get("roleTagMeta") or {}
+        activity = role_tag_meta.get("activity") or {}
+        tagged = bool(row.get("roleTags"))
         last_cast_at = activity.get("lastCastAt") or ""
         return (
             0 if tagged else 1,
@@ -870,7 +823,7 @@ def main() -> None:
         tagged_active_fids = sorted(
             int(row["fid"])
             for row in active_rows
-            if (row.get("contextTags") or {}).get("assignedRoles") or (row.get("contextTags") or {}).get("assignedTopics")
+            if row.get("roleTags")
         )
         if tagged_active_fids:
             metadata_by_fid = fetch_hub_profiles(module=module, hub_url=args.hub_url, fids=tagged_active_fids)

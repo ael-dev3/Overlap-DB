@@ -22,8 +22,8 @@ Current committed snapshot:
 - `shard 1: complete`
 - `shard 2: paused with resume token recorded in progress.json`
 - `unranked folder: offline scan-state metadata only; individual non-ranked FIDs were not persisted`
-- `24h direct Snapchain context: 14460 active authors, 1029 tagged authors`
-- `24h high-score cohort with direct Snapchain tags: 50 tagged users out of 2509`
+- `24h direct Snapchain context: 14460 active authors, 512 role-tagged authors`
+- `24h high-score cohort with direct Snapchain role tags: 32 tagged users out of 2509`
 
 These files are generated from:
 
@@ -83,28 +83,32 @@ Build a 7-day context pass only for the existing `>=0.99` cohort:
 npm run tag:cohort:7d
 ```
 
+Rewrite committed Snapchain context artifacts into the current role-only schema without making new network calls:
+
+```bash
+npm run rewrite:role-tags
+```
+
 Validate all committed datasets, including direct Snapchain context artifacts:
 
 ```bash
 npm run validate
 ```
 
-## Context tagging
+## Role tagging
 
 The direct Snapchain context pass writes two families of artifacts:
 
 - `data/snapchain-active-context.users.last-24h.json`
   Active authors seen in the rolling window, each with:
   - `fid`
+  - `roleTags`
+  - `roleTagMeta`
   - `snapchainProfile`
-  - `contextTags.assignedRoles`
-  - `contextTags.assignedTopics`
-  - `contextTags.activity`
-  - `contextTags.keywords`
-  - deterministic evidence snippets
+  - deterministic role evidence and activity metadata
 - `data/neynar-score-gte-0.99.users.with-context-tags.last-24h.json`
   The existing high-score Neynar cohort merged with the same direct
-  Snapchain `contextTags`.
+  Snapchain `roleTags`.
 
 Current role taxonomy:
 
@@ -113,29 +117,14 @@ Current role taxonomy:
 - `creator`
 - `artist`
 
-Current topic taxonomy:
-
-- `ai`
-- `agents`
-- `base`
-- `bitcoin`
-- `content`
-- `defi`
-- `ethereum`
-- `gaming`
-- `hyperliquid`
-- `mini_apps`
-- `nfts`
-- `social`
-- `solana`
-- `trading`
-
 The tagger is deterministic and intentionally conservative:
 
 - it uses direct hub events only, not Neynar content APIs
-- it requires repeated lexical evidence before assigning roles/topics
+- it requires repeated lexical evidence before assigning roles
 - `builder` is gated by technical/developer-style language to avoid noisy
   `build/built` social chatter
+- `trader` is gated by stronger market-language qualifiers to avoid generic
+  uses of words like `exit`
 - summaries and datasets are cross-checked by `npm run validate`
 
 ## Notes

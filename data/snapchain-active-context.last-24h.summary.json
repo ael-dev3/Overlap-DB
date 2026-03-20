@@ -3,14 +3,14 @@
   "hubUrl": "http://54.157.62.17:3381",
   "outputUsers": "data/snapchain-active-context.users.last-24h.json",
   "outputSummary": "data/snapchain-active-context.last-24h.summary.json",
-  "scanWindowHours": 24.0,
+  "scanWindowHours": 24,
   "shards": [
     1,
     2
   ],
   "source": "snapchain_direct_via_farcaster_context_skill",
   "fetch": {
-    "hours": 24.0,
+    "hours": 24,
     "mergeEventsProcessed": 259734,
     "rawEventsProcessed": 506391,
     "reactionMessagesProcessed": 78227,
@@ -29,23 +29,7 @@
       "creator": 64,
       "trader": 137
     },
-    "taggedUsers": 1029,
-    "topicCounts": {
-      "agents": 38,
-      "ai": 143,
-      "base": 182,
-      "bitcoin": 32,
-      "content": 24,
-      "defi": 190,
-      "ethereum": 43,
-      "gaming": 59,
-      "hyperliquid": 8,
-      "mini_apps": 22,
-      "nfts": 60,
-      "social": 82,
-      "solana": 9,
-      "trading": 46
-    },
+    "taggedUsers": 512,
     "totalUsers": 14460
   }
 }
