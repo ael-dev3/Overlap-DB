@@ -65,6 +65,15 @@ Validate the generated files:
 npm run validate
 ```
 
+Query the committed snapshot without opening the raw JSON files:
+
+```bash
+npm run query -- --username farcaster
+npm run query -- --query base --limit 20
+npm run query -- --dataset cohort-24h --role builder --limit 10
+npm run query -- --dataset active-24h --address 0xdb83ae472f108049828db5f429595c4b5932b62c
+```
+
 Export the current local cache into committed snapshot files without making additional API calls:
 
 ```bash
